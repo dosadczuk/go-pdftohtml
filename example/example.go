@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dosadczuk/pdftohtml"
+	"github.com/dosadczuk/go-pdftohtml"
 )
 
 func main() {

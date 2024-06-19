@@ -11,9 +11,9 @@ import (
 func main() {
 	cmd := pdftohtml.NewCommand(
 		pdftohtml.WithOutdirOverwrite(),
-		pdftohtml.WithMeta(),
-		pdftohtml.WithFormFields(),
-		pdftohtml.WithEmbededFonts(),
+		pdftohtml.WithEmbedMetaTags(),
+		pdftohtml.WithEmbedFormFields(),
+		pdftohtml.WithEmbedFonts(),
 	)
 
 	err := cmd.Run(context.Background(), "./example.pdf", "./html")

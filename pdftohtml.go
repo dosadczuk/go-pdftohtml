@@ -132,7 +132,7 @@ func WithVerticalStretch(factor float64) option {
 
 // Embeds the background image as base64-encoded data directly in the HTML file,
 // rather than storing it as a separate file.
-func WithEmbededBackground() option {
+func WithEmbedBackground() option {
 	return func(c *command) {
 		c.args = append(c.args, "-embedbackground")
 	}
@@ -150,7 +150,7 @@ func WithNoFonts() option {
 
 // Embeds any extracted fonts as base64-encoded data directly in the HTML file, rather
 // than storing them as separate files.
-func WithEmbededFonts() option {
+func WithEmbedFonts() option {
 	return func(c *command) {
 		c.args = append(c.args, "-embedfonts")
 	}
@@ -181,14 +181,14 @@ func WithAllInvisibleText() option {
 //
 // This also removes text (e.g., underscore characters) and erases background image content
 // (e.g., lines or boxes) in the field areas.
-func WithFormFields() option {
+func WithEmbedFormFields() option {
 	return func(c *command) {
 		c.args = append(c.args, "-formfields")
 	}
 }
 
 // Include PDF document metadata as ’meta’ elements in the HTML header.
-func WithMeta() option {
+func WithEmbedMetaTags() option {
 	return func(c *command) {
 		c.args = append(c.args, "-meta")
 	}

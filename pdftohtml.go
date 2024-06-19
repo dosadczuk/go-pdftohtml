@@ -8,6 +8,7 @@
 package pdftohtml
 
 import (
+	"context"
 	"os/exec"
 	"strconv"
 )
@@ -32,8 +33,8 @@ func NewCommand(opts ...option) *command {
 }
 
 // Run executes prepared `pdftohtml` command.
-func (c *command) Run(inpath, outdir string) error {
-	cmd := exec.Command(c.path, append(c.args, inpath, outdir)...)
+func (c *command) Run(ctx context.Context, inpath, outdir string) error {
+	cmd := exec.CommandContext(ctx, c.path, append(c.args, inpath, outdir)...)
 
 	return cmd.Run()
 }

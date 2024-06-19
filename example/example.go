@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -15,7 +16,7 @@ func main() {
 		pdftohtml.WithEmbededFonts(),
 	)
 
-	err := cmd.Run("./example.pdf", "./html")
+	err := cmd.Run(context.Background(), "./example.pdf", "./html")
 	if err != nil {
 		log.Panic(err)
 	}

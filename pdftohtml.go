@@ -1,4 +1,4 @@
-// Package pdftohtml is a wrapper aroung Xpdf command line tool `pdftohtml`.
+// Package pdftohtml is a wrapper for Xpdf command line tool `pdftohtml`.
 //
 // What is `pdftohtml`?
 //
@@ -9,6 +9,7 @@ package pdftohtml
 
 import (
 	"context"
+	"log"
 	"os/exec"
 	"strconv"
 )
@@ -24,9 +25,17 @@ type command struct {
 
 // NewCommand creates new `pdftohtml` command.
 func NewCommand(opts ...option) *command {
-	cmd := &command{path: "/usr/bin/pdftohtml"}
+	cmd := &command{path: "pdftohtml"}
 	for _, opt := range opts {
 		opt(cmd)
+	}
+
+	var err error
+
+	// assert that executable exists and get absolute path
+	cmd.path, err = exec.LookPath(cmd.path)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return cmd

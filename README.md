@@ -1,6 +1,6 @@
 # go-pdftohtml
 
-Package pdftohtml is a wrapper around Xpdf command line tool `pdftohtml`.
+Package pdftohtml is a wrapper for Xpdf command line tool `pdftohtml`.
 
 What is `pdftohtml`?
 

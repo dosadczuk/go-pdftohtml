@@ -9,14 +9,17 @@ import (
 )
 
 func main() {
-	cmd := pdftohtml.NewCommand(
+	cmd, err := pdftohtml.NewCommand(
 		pdftohtml.WithOutdirOverwrite(),
 		pdftohtml.WithEmbedMetaTags(),
 		pdftohtml.WithEmbedFormFields(),
 		pdftohtml.WithEmbedFonts(),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := cmd.Run(context.Background(), "./example.pdf", "./html")
+	err = cmd.Run(context.Background(), "./example.pdf", "./html")
 	if err != nil {
 		log.Panic(err)
 	}

@@ -9,7 +9,6 @@ package pdftohtml
 
 import (
 	"context"
-	"log"
 	"os/exec"
 	"strconv"
 )
@@ -18,14 +17,14 @@ import (
 // -- `pdftohtml`
 // ----------------------------------------------------------------------------
 
-type command struct {
+type Command struct {
 	path string
 	args []string
 }
 
 // NewCommand creates new `pdftohtml` command.
-func NewCommand(opts ...option) *command {
-	cmd := &command{path: "pdftohtml"}
+func NewCommand(opts ...option) (*Command, error) {
+	cmd := &Command{path: "pdftohtml"}
 	for _, opt := range opts {
 		opt(cmd)
 	}
@@ -35,21 +34,21 @@ func NewCommand(opts ...option) *command {
 	// assert that executable exists and get absolute path
 	cmd.path, err = exec.LookPath(cmd.path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return cmd
+	return cmd, nil
 }
 
 // Run executes prepared `pdftohtml` command.
-func (c *command) Run(ctx context.Context, inpath, outdir string) error {
+func (c *Command) Run(ctx context.Context, inpath, outdir string) error {
 	cmd := exec.CommandContext(ctx, c.path, append(c.args, inpath, outdir)...)
 
 	return cmd.Run()
 }
 
 // String returns a human-readable description of the command.
-func (c *command) String() string {
+func (c *Command) String() string {
 	return exec.Command(c.path, append(c.args, "<inpath>", "<outdir>")...).String()
 }
 
@@ -57,18 +56,18 @@ func (c *command) String() string {
 // -- `pdftohtml` options
 // ----------------------------------------------------------------------------
 
-type option func(*command)
+type option func(*Command)
 
 // Set custom location for `pdftotext` executable.
 func WithCustomPath(path string) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.path = path
 	}
 }
 
 // Read config-file in place of ~/.xpdfrc or the system-wide config file.
 func WithCustomConfig(path string) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-cfg", path)
 	}
 }
@@ -78,28 +77,28 @@ func WithCustomConfig(path string) option {
 // By default pdftohtml will not overwrite the output directory. If the directory already
 // exists, pdftohtml will exit with an error.
 func WithOutdirOverwrite() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-overwrite")
 	}
 }
 
 // Specifies the first page to convert.
 func WithPageFrom(page uint64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-f", strconv.FormatUint(page, 10))
 	}
 }
 
 // Specifies the last page to convert.
 func WithPageTo(page uint64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-l", strconv.FormatUint(page, 10))
 	}
 }
 
 // Specifies the range of pages to convert.
 func WithPageRange(from, to uint64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		WithPageFrom(from)
 		WithPageTo(to)
 	}
@@ -112,7 +111,7 @@ func WithPageRange(from, to uint64) option {
 //
 // Using ´-z 1.5’, for example, will make the initial view 50% larger.
 func WithInitialZoom(zoom float64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-z", strconv.FormatFloat(zoom, 'e', 2, 64))
 	}
 }
@@ -124,7 +123,7 @@ func WithInitialZoom(zoom float64) option {
 // a larger zoom value will allow the viewer to zoom in farther without upscaling
 // artifacts in the background.
 func WithResolution(dpi uint64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-r", strconv.FormatUint(dpi, 10))
 	}
 }
@@ -134,7 +133,7 @@ func WithResolution(dpi uint64) option {
 // Setting this to a value greater than 1.0 will stretch each page vertically,
 // spreading out the lines. This also stretches the background image to match.
 func WithVerticalStretch(factor float64) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-vstretch", strconv.FormatFloat(factor, 'e', 2, 64))
 	}
 }
@@ -142,7 +141,7 @@ func WithVerticalStretch(factor float64) option {
 // Embeds the background image as base64-encoded data directly in the HTML file,
 // rather than storing it as a separate file.
 func WithEmbedBackground() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-embedbackground")
 	}
 }
@@ -152,7 +151,7 @@ func WithEmbedBackground() option {
 // By default, pdftohtml extracts TrueType and OpenType fonts. Disabling extraction
 // can work around problems with buggy fonts.
 func WithNoFonts() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-nofonts")
 	}
 }
@@ -160,7 +159,7 @@ func WithNoFonts() option {
 // Embeds any extracted fonts as base64-encoded data directly in the HTML file, rather
 // than storing them as separate files.
 func WithEmbedFonts() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-embedfonts")
 	}
 }
@@ -170,7 +169,7 @@ func WithEmbedFonts() option {
 // By default, invisible text (commonly used in OCR’ed PDF files) is drawn as transparent
 // (alpha=0) HTML text. This option tells pdftohtml to discard invisible text entirely.
 func WithNoInvisibleText() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-skipinvisible")
 	}
 }
@@ -181,7 +180,7 @@ func WithNoInvisibleText() option {
 // instead drawn with HTML on top of the image. This option tells pdftohtml to include the
 // regular text in the background image, and then draw it as transparent (alpha=0) HTML text.
 func WithAllInvisibleText() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-allinvisible")
 	}
 }
@@ -191,14 +190,14 @@ func WithAllInvisibleText() option {
 // This also removes text (e.g., underscore characters) and erases background image content
 // (e.g., lines or boxes) in the field areas.
 func WithEmbedFormFields() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-formfields")
 	}
 }
 
 // Include PDF document metadata as ’meta’ elements in the HTML header.
 func WithEmbedMetaTags() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-meta")
 	}
 }
@@ -209,7 +208,7 @@ func WithEmbedMetaTags() option {
 //
 // Note: This does not generate HTML tables; it just changes the way text is split up.
 func WithModeTable() option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-table")
 	}
 }
@@ -218,14 +217,14 @@ func WithModeTable() option {
 //
 // Providing this will bypass all security restrictions.
 func WithOwnerPassword(password string) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-opw", password)
 	}
 }
 
 // Specify the user password for the PDF file.
 func WithUserPassword(password string) option {
-	return func(c *command) {
+	return func(c *Command) {
 		c.args = append(c.args, "-upw", password)
 	}
 }
